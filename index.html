@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Colour-MY-Words</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f8fafc;
+            overflow-x: hidden;
+        }
+
+        /* The wheel styling */
+        .wheel-container {
+            position: relative;
+            width: 320px;
+            height: 320px;
+            margin: 0 auto;
+        }
+
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            /* 0-90: Red
+               90-180: Yellow
+               180-270: Green
+               270-360: Blue
+            */
+            background: conic-gradient(
+                #ef4444 0deg 90deg,
+                #eab308 90deg 180deg,
+                #22c55e 180deg 270deg,
+                #3b82f6 270deg 360deg
+            );
+            transition: transform 3s cubic-bezier(0.25, 0.1, 0.15, 1);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border: 4px solid #ffffff;
+        }
+
+        /* Inner circle for aesthetics */
+        .wheel::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Pointer */
+        .pointer {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 30px solid #1e293b;
+            z-index: 10;
+            filter: drop-shadow(0 4px 2px rgba(0,0,0,0.2));
+        }
+
+        /* Card transition */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Theme colors for dynamic styling */
+        .theme-red { background-color: #fef2f2; border-color: #ef4444; color: #991b1b; }
+        .theme-yellow { background-color: #fefce8; border-color: #eab308; color: #854d0e; }
+        .theme-green { background-color: #f0fdf4; border-color: #22c55e; color: #166534; }
+        .theme-blue { background-color: #eff6ff; border-color: #3b82f6; color: #1e40af; }
+        .theme-default { background-color: #ffffff; border-color: #e2e8f0; color: #475569; }
+
+        /* Gentle pulse for the welcome screen logo */
+        @keyframes pulse-gentle {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+        .pulse-logo {
+            animation: pulse-gentle 4s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+    <!-- WELCOME SCREEN (Active by default) -->
+    <div id="welcomeScreen" class="flex-grow flex items-center justify-center p-4 transition-all duration-700 ease-in-out">
+        <div class="max-w-md w-full bg-white rounded-3xl shadow-xl border border-slate-100 p-8 text-center flex flex-col items-center space-y-8">
+            <!-- App Logo / Decorative Wheel -->
+            <div class="relative w-40 h-40 pulse-logo">
+                <div class="w-full h-full rounded-full border-4 border-white shadow-lg" style="background: conic-gradient(#ef4444 0deg 90deg, #eab308 90deg 180deg, #22c55e 180deg 270deg, #3b82f6 270deg 360deg);"></div>
+                <!-- Inner soft aesthetic detail -->
+                <div class="absolute inset-0 m-auto w-10 h-10 bg-white rounded-full shadow-inner flex items-center justify-center">
+                    <span class="text-xs font-bold text-slate-400">❤</span>
+                </div>
+            </div>
+
+            <!-- Titles -->
+            <div class="space-y-3">
+                <h1 class="text-3xl md:text-4xl font-extrabold text-slate-800 tracking-tight">
+                    Colour-<span class="text-indigo-600">MY</span>-Words
+                </h1>
+                <p class="text-slate-500 text-sm leading-relaxed max-w-sm mx-auto">
+                    A colorful counseling aid to guide safe reflection, explore raw feelings, nurture relationships, and inspire future hopes.
+                </p>
+            </div>
+
+            <!-- Bullet points of features to welcome users -->
+            <div class="w-full text-left bg-slate-50 rounded-2xl p-4 border border-slate-100 space-y-2 text-xs text-slate-600">
+                <div class="flex items-center space-x-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-red-500 shrink-0"></span>
+                    <span><strong>Red:</strong> Feelings & Emotions</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-yellow-500 shrink-0"></span>
+                    <span><strong>Yellow:</strong> Self-Discovery</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-green-500 shrink-0"></span>
+                    <span><strong>Green:</strong> Relationships & Support</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-blue-500 shrink-0"></span>
+                    <span><strong>Blue:</strong> Hopes & Reflection</span>
+                </div>
+            </div>
+
+            <!-- Let us start button -->
+            <button id="startButton" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-8 rounded-2xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 active:translate-y-0 text-lg">
+                Let us start!
+            </button>
+        </div>
+    </div>
+
+
+    <!-- MAIN APP SCREEN (Hidden by default) -->
+    <div id="appScreen" class="hidden flex-grow flex flex-col transition-all duration-700 ease-in-out opacity-0">
+        <!-- Header -->
+        <header class="bg-white shadow-sm p-4 sticky top-0 z-50">
+            <div class="max-w-5xl mx-auto flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                    <h1 class="text-2xl font-bold text-gray-800 tracking-tight">Colour-MY-Words</h1>
+                </div>
+                <button id="audioToggleBtn" class="flex items-center space-x-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-full transition shadow-sm">
+                    <span id="audioIcon">
+                        <!-- Volume Mute SVG -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" clip-rule="evenodd" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+                        </svg>
+                    </span>
+                    <span id="audioText" class="font-semibold text-sm">Music Off</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-grow w-full max-w-5xl mx-auto p-4 md:p-8 grid grid-cols-1 md:grid-cols-2 gap-10 items-start">
+            
+            <!-- Left Column: The Wheel -->
+            <div class="flex flex-col items-center space-y-6 bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+                <h2 class="text-xl font-bold text-gray-700">The Discovery Wheel</h2>
+                <div class="wheel-container">
+                    <div class="pointer"></div>
+                    <div id="wheel" class="wheel"></div>
+                </div>
+                
+                <!-- Wheel Mode Controls -->
+                <div id="freeModeControls" class="w-full text-center mt-6">
+                    <button id="spinBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-8 rounded-2xl shadow-lg transition-transform transform hover:-translate-y-1 active:translate-y-0 text-lg">
+                        Spin the Wheel
+                    </button>
+                    <p class="text-gray-500 text-sm mt-3">Let chance guide your reflection.</p>
+                </div>
+            </div>
+
+            <!-- Right Column: Controls and Display -->
+            <div class="flex flex-col space-y-6">
+                
+                <!-- Mode Selector -->
+                <div class="bg-white p-2 rounded-2xl shadow-sm border border-gray-100 flex space-x-2">
+                    <button id="modeFreeBtn" class="flex-1 py-3 px-4 rounded-xl font-bold text-indigo-700 bg-indigo-50 transition">
+                        Free Colour Mode
+                    </button>
+                    <button id="modeChoiceBtn" class="flex-1 py-3 px-4 rounded-xl font-bold text-gray-500 hover:bg-gray-50 transition">
+                        Colour Choice Mode
+                    </button>
+                </div>
+
+                <!-- Choice Mode Controls (Hidden by default) -->
+                <div id="choiceModeControls" class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 hidden">
+                    <h3 class="text-lg font-bold text-gray-700 mb-4 text-center">Choose a Theme</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <button class="choice-btn bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-4 rounded-xl shadow transition" data-color="red">
+                            Red (Feelings)
+                        </button>
+                        <button class="choice-btn bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-4 rounded-xl shadow transition" data-color="yellow">
+                            Yellow (Self)
+                        </button>
+                        <button class="choice-btn bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-xl shadow transition" data-color="green">
+                            Green (Relations)
+                        </button>
+                        <button class="choice-btn bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-xl shadow transition" data-color="blue">
+                            Blue (Hopes)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Question Display Card -->
+                <div id="questionCard" class="theme-default p-8 rounded-3xl border-2 shadow-md min-h-[250px] flex flex-col justify-center items-center text-center transition-colors duration-500">
+                    <div id="themeBadge" class="uppercase tracking-wider text-xs font-bold px-3 py-1 rounded-full bg-white bg-opacity-50 mb-4 opacity-0 transition-opacity">
+                        Theme
+                    </div>
+                    <h2 id="questionText" class="text-2xl font-bold leading-relaxed">
+                        Ready to discover? <br> <span class="text-lg font-normal mt-2 block">Choose a mode above to begin.</span>
+                    </h2>
+                    <p id="remainingText" class="text-xs mt-6 opacity-60 font-semibold"></p>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="p-4 text-center text-xs text-slate-400">
+        © 2026 Colour-MY-Words. All Rights Reserved.
+    </footer>
+
+    <script>
+        // --- DATA ---
+        const questionsData = {
+            red: [
+                "How are you feeling today?",
+                "Which emotion characterizes your day?",
+                "What has been preoccupying you recently?",
+                "Do you have anything that put a smile on your face recently?",
+                "Are there any things that have been annoying you?",
+                "How do you relax when you are stressed out?",
+                "How do you feel like yourself?",
+                "Which emotion is difficult for you to convey?",
+                "How can you find peace?",
+                "What color is your mood today and why?"
+            ],
+            yellow: [
+                "What is one of your best qualities?",
+                "What is something that you are proud of?",
+                "What gives you confidence?",
+                "What is something about yourself that you continue to learn about?",
+                "What are some of your strengths?",
+                "What makes you happy?",
+                "What is something that you love to do?",
+                "What are your core values?",
+                "How would you describe yourself in three words?",
+                "What gives you the feeling of being understood?"
+            ],
+            green: [
+                "Who gives you a sense of security?",
+                "What are the qualities that you admire in a friend?",
+                "To whom do you normally go when you’re having a tough day?",
+                "What gives you a sense of security?",
+                "How do you express your concern for others?",
+                "What is trust?",
+                "Could you describe an individual who has been a positive influence in your life?",
+                "How do you normally deal with disagreements?",
+                "What gives you a sense of connection with others?",
+                "What sort of support do you appreciate the most?"
+            ],
+            blue: [
+                "What is one of the goals that you hope to accomplish?",
+                "What is your perfect day like?",
+                "What do you have coming up that you're excited about?",
+                "What is one thing in your life that you wish to change?",
+                "What keeps you motivated?",
+                "What have you discovered about yourself lately?",
+                "How do you define happiness?",
+                "What would you like people to know about you?",
+                "What is your hope for the future?",
+                "What is one piece of advice you would give yourself?"
+            ]
+        };
+
+        const themes = {
+            red: { title: "Feelings & Emotions", class: "theme-red" },
+            yellow: { title: "Self-Discovery", class: "theme-yellow" },
+            green: { title: "Relationships & Support", class: "theme-green" },
+            blue: { title: "Hopes & Reflection", class: "theme-blue" }
+        };
+
+        // --- STATE ---
+        let remainingQuestions = {
+            red: [],
+            yellow: [],
+            green: [],
+            blue: []
+        };
+        let currentRotation = 0;
+        let isSpinning = false;
+        let currentMode = 'free'; // 'free' or 'choice'
+
+        // --- UTILS ---
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Get a random question, refilling the deck if necessary
+        function getNextQuestion(color) {
+            if (remainingQuestions[color].length === 0) {
+                // Refill and shuffle
+                remainingQuestions[color] = [...questionsData[color]];
+                shuffleArray(remainingQuestions[color]);
+            }
+            return {
+                text: remainingQuestions[color].pop(),
+                remainingCount: remainingQuestions[color].length,
+                totalCount: questionsData[color].length
+            };
+        }
+
+        // --- UI UPDATES ---
+        const welcomeScreen = document.getElementById('welcomeScreen');
+        const appScreen = document.getElementById('appScreen');
+        const startButton = document.getElementById('startButton');
+
+        const wheelEl = document.getElementById('wheel');
+        const spinBtn = document.getElementById('spinBtn');
+        const questionCard = document.getElementById('questionCard');
+        const themeBadge = document.getElementById('themeBadge');
+        const questionText = document.getElementById('questionText');
+        const remainingText = document.getElementById('remainingText');
+        const modeFreeBtn = document.getElementById('modeFreeBtn');
+        const modeChoiceBtn = document.getElementById('modeChoiceBtn');
+        const freeModeControls = document.getElementById('freeModeControls');
+        const choiceModeControls = document.getElementById('choiceModeControls');
+
+        // Welcome transitions
+        startButton.addEventListener('click', () => {
+            // First, trigger audio context initialization (due to browser policy)
+            initAudioContext();
+            
+            // Fade out welcome screen
+            welcomeScreen.classList.add('opacity-0', 'scale-95');
+            
+            setTimeout(() => {
+                welcomeScreen.classList.add('hidden');
+                appScreen.classList.remove('hidden');
+                
+                // Triggers subtle fade-in animation for app
+                setTimeout(() => {
+                    appScreen.classList.remove('opacity-0');
+                    appScreen.classList.add('opacity-100');
+                }, 50);
+            }, 500);
+        });
+
+        function updateCardDisplay(color, questionData) {
+            // Remove old animations
+            questionText.classList.remove('fade-in');
+            void questionText.offsetWidth; // trigger reflow
+            
+            // Remove old theme classes
+            Object.values(themes).forEach(t => questionCard.classList.remove(t.class));
+            questionCard.classList.remove('theme-default');
+            
+            // Apply new theme
+            questionCard.classList.add(themes[color].class);
+            themeBadge.textContent = `${color.toUpperCase()} – ${themes[color].title}`;
+            themeBadge.style.opacity = 1;
+            
+            // Apply text
+            questionText.textContent = questionData.text;
+            questionText.classList.add('fade-in');
+            
+            // Apply counter
+            remainingText.textContent = `Questions left in ${color} set: ${questionData.remainingCount}/${questionData.totalCount}`;
+        }
+
+        function setWheelRotationForColor(color) {
+            // Target angles to align the color's midpoint under the top pointer (0deg)
+            // Red (0-90) Midpoint: 45. To reach 0 -> 360-45 = 315
+            // Yellow (90-180) Midpoint: 135. To reach 0 -> 360-135 = 225
+            // Green (180-270) Midpoint: 225. To reach 0 -> 360-225 = 135
+            // Blue (270-360) Midpoint: 315. To reach 0 -> 360-315 = 45
+            const baseAngles = {
+                red: 315,
+                yellow: 225,
+                green: 135,
+                blue: 45
+            };
+
+            // Add 3 to 5 full spins for effect
+            const extraSpins = (Math.floor(Math.random() * 3) + 3) * 360;
+            
+            // To ensure it always rotates forward, calculate nearest future rotation
+            const targetBase = baseAngles[color];
+            const currentBase = currentRotation % 360;
+            let diff = targetBase - currentBase;
+            if (diff <= 0) diff += 360;
+            
+            currentRotation += diff + extraSpins;
+            wheelEl.style.transform = `rotate(${currentRotation}deg)`;
+        }
+
+        // --- EVENT HANDLERS ---
+        spinBtn.addEventListener('click', () => {
+            if (isSpinning) return;
+            isSpinning = true;
+            spinBtn.disabled = true;
+            spinBtn.classList.add('opacity-75', 'cursor-not-allowed');
+            
+            questionText.textContent = "Spinning...";
+            questionText.classList.remove('fade-in');
+            themeBadge.style.opacity = 0;
+            remainingText.textContent = "";
+            questionCard.className = "theme-default p-8 rounded-3xl border-2 shadow-md min-h-[250px] flex flex-col justify-center items-center text-center transition-colors duration-500";
+
+            const colors = ['red', 'yellow', 'green', 'blue'];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            
+            setWheelRotationForColor(randomColor);
+
+            // Wait for CSS transition (3s)
+            setTimeout(() => {
+                const questionData = getNextQuestion(randomColor);
+                updateCardDisplay(randomColor, questionData);
+                
+                isSpinning = false;
+                spinBtn.disabled = false;
+                spinBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+            }, 3000);
+        });
+
+        document.querySelectorAll('.choice-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                if (isSpinning) return;
+                const color = e.target.getAttribute('data-color');
+                setWheelRotationForColor(color); // visually update wheel instantly or with animation
+                
+                const questionData = getNextQuestion(color);
+                updateCardDisplay(color, questionData);
+            });
+        });
+
+        // Mode Switching
+        modeFreeBtn.addEventListener('click', () => {
+            if (isSpinning) return;
+            currentMode = 'free';
+            modeFreeBtn.classList.replace('text-gray-500', 'text-indigo-700');
+            modeFreeBtn.classList.replace('hover:bg-gray-50', 'bg-indigo-50');
+            modeChoiceBtn.classList.replace('text-indigo-700', 'text-gray-500');
+            modeChoiceBtn.classList.replace('bg-indigo-50', 'hover:bg-gray-50');
+            
+            freeModeControls.classList.remove('hidden');
+            choiceModeControls.classList.add('hidden');
+        });
+
+        modeChoiceBtn.addEventListener('click', () => {
+            if (isSpinning) return;
+            currentMode = 'choice';
+            modeChoiceBtn.classList.replace('text-gray-500', 'text-indigo-700');
+            modeChoiceBtn.classList.replace('hover:bg-gray-50', 'bg-indigo-50');
+            modeFreeBtn.classList.replace('text-indigo-700', 'text-gray-500');
+            modeFreeBtn.classList.replace('bg-indigo-50', 'hover:bg-gray-50');
+            
+            choiceModeControls.classList.remove('hidden');
+            freeModeControls.classList.add('hidden');
+        });
+
+        // --- AUDIO GENERATION (Web Audio API) ---
+        // Generates a simple, calming ambient piano/chime sound sequence
+        let audioCtx;
+        let isAudioPlaying = false;
+        let audioInterval;
+
+        const volumeUpSVG = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+            </svg>`;
+        const volumeMutedSVG = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" clip-rule="evenodd" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+            </svg>`;
+
+        // Calming pentatonic scale frequencies (C, D, E, G, A)
+        const scale = [261.63, 293.66, 329.63, 392.00, 440.00];
+        
+        function initAudioContext() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContext();
+            }
+        }
+
+        function playCalmNote() {
+            if (!audioCtx) return;
+            
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            // Random note from scale
+            const freq = scale[Math.floor(Math.random() * scale.length)];
+            
+            // Drop an octave lower occasionally for depth
+            osc.frequency.value = Math.random() > 0.8 ? freq / 2 : freq;
+            osc.type = 'sine'; // Smooth, pure tone
+            
+            // Connect nodes
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            const now = audioCtx.currentTime;
+            
+            // Envelope generation (Attack, Decay, Release) simulating a soft piano/bell strike
+            gainNode.gain.setValueAtTime(0, now);
+            gainNode.gain.linearRampToValueAtTime(0.15, now + 0.1); // Soft attack
+            gainNode.gain.exponentialRampToValueAtTime(0.001, now + 3); // Long decay
+            
+            osc.start(now);
+            osc.stop(now + 3.1);
+        }
+
+        const audioToggleBtn = document.getElementById('audioToggleBtn');
+        const audioIcon = document.getElementById('audioIcon');
+        const audioText = document.getElementById('audioText');
+
+        audioToggleBtn.addEventListener('click', () => {
+            initAudioContext();
+            
+            if (!isAudioPlaying) {
+                if(audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+
+                // Start loop
+                isAudioPlaying = true;
+                audioIcon.innerHTML = volumeUpSVG;
+                audioText.textContent = "Music On";
+                audioToggleBtn.classList.replace('bg-gray-100', 'bg-indigo-100');
+                audioToggleBtn.classList.replace('text-gray-700', 'text-indigo-700');
+                
+                // Play first note immediately, then loop
+                playCalmNote();
+                audioInterval = setInterval(playCalmNote, 2500); // New note every 2.5 seconds
+            } else {
+                // Stop loop
+                isAudioPlaying = false;
+                audioIcon.innerHTML = volumeMutedSVG;
+                audioText.textContent = "Music Off";
+                audioToggleBtn.classList.replace('bg-indigo-100', 'bg-gray-100');
+                audioToggleBtn.classList.replace('text-indigo-700', 'text-gray-700');
+                
+                clearInterval(audioInterval);
+                if (audioCtx) {
+                    audioCtx.suspend();
+                }
+            }
+        });
+
+    </script>
+</body>
+</html>
